@@ -792,28 +792,36 @@ function LunoxLib:MakeWindow(WindowConfig)
 		end)
 
 		local function GetElements(ItemParent)
-			local ElementFunction = {}
-			function ElementFunction:AddLabel(Text)
-				local LabelFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-					Size = UDim2.new(1, 0, 0, 30),
-					BackgroundTransparency = 0.7,
-					Parent = ItemParent
-				}), {
-					AddThemeObject(SetProps(MakeElement("Label", Text, 15), {
-						Size = UDim2.new(1, -12, 1, 0),
-						Position = UDim2.new(0, 12, 0, 0),
-						Font = Enum.Font.GothamBold,
-						Name = "Content"
-					}), "Text"),
-					AddThemeObject(MakeElement("Stroke"), "Stroke")
-				}), "Second")
+    local ElementFunction = {}
 
-				local LabelFunction = {}
-				function LabelFunction:Set(ToChange)
-					LabelFrame.Content.Text = ToChange
-				end
-				return LabelFunction
-			end
+    function ElementFunction:AddLabel(Text)
+        local LabelFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
+            Size = UDim2.new(1, 0, 0, 30),
+            BackgroundTransparency = 0.7,
+            Parent = ItemParent
+        }), {
+            AddThemeObject(SetProps(MakeElement("Label", Text, 15), {
+                Size = UDim2.new(1, -12, 1, 0),
+                Position = UDim2.new(0, 12, 0, 0),
+                Font = Enum.Font.GothamBold,
+                Name = "Content"
+            }), "Text"),
+            AddThemeObject(MakeElement("Stroke"), "Stroke")
+        }), "Second")
+
+        local LabelFunction = {}
+        function LabelFunction:Set(ToChange)
+            LabelFrame.Content.Text = ToChange
+        end
+
+        function LabelFunction:Remove()
+            if LabelFrame and LabelFrame.Parent then
+                LabelFrame:Destroy()
+            end
+        end
+
+        return LabelFunction
+    end
 			function ElementFunction:AddParagraph(Text, Content)
 				Text = Text or "Text"
 				Content = Content or "Content"
