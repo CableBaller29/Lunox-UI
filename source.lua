@@ -1715,15 +1715,6 @@ function LunoxLib:MakeWindow(WindowConfig)
 		end
 		return ElementFunction   
 	end  
-	
-	LunoxLib:MakeNotification({
-		Name = "UI Library Upgrade",
-		Content = "New UI Library Available at sirius.menu/discord and sirius.menu/rayfield",
-		Time = 5
-	})
-	
-
-	
 	return TabFunction
 end   
 
