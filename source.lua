@@ -1093,173 +1093,196 @@ function LunoxLib:MakeWindow(WindowConfig)
 				return Slider
 			end  
 			function ElementFunction:AddDropdown(DropdownConfig)
-	DropdownConfig = DropdownConfig or {}
-	DropdownConfig.Name = DropdownConfig.Name or "Dropdown"
-	DropdownConfig.Options = DropdownConfig.Options or {}
-	DropdownConfig.Default = DropdownConfig.Default or {}
-	DropdownConfig.Callback = DropdownConfig.Callback or function() end
-	DropdownConfig.Flag = DropdownConfig.Flag or nil
-	DropdownConfig.Save = DropdownConfig.Save or false
+    DropdownConfig = DropdownConfig or {}
+    DropdownConfig.Name = DropdownConfig.Name or "Dropdown"
+    DropdownConfig.Options = DropdownConfig.Options or {}
+    DropdownConfig.Default = DropdownConfig.Default or {}
+    DropdownConfig.Callback = DropdownConfig.Callback or function() end
+    DropdownConfig.Flag = DropdownConfig.Flag or nil
+    DropdownConfig.Save = DropdownConfig.Save or false
 
-	local Dropdown = {
-		Values = {},
-		Options = DropdownConfig.Options,
-		Buttons = {},
-		Toggled = false,
-		Type = "Dropdown",
-		Save = DropdownConfig.Save
-	}
-	local MaxElements = 5
+    -- Selected values stored as keys with true, for fast lookup
+    local SelectedValues = {}
+    for _, val in pairs(DropdownConfig.Default) do
+        SelectedValues[val] = true
+    end
 
-	local function UpdateSelectedText()
-		local text = table.concat(Dropdown.Values, ", ")
-		DropdownFrame.F.Selected.Text = text == "" and "None" or text
-	end
+    local MaxElements = 5
 
-	local DropdownList = MakeElement("List")
+    local Dropdown = {
+        Value = SelectedValues,
+        Options = DropdownConfig.Options,
+        Buttons = {},
+        Toggled = false,
+        Type = "Dropdown",
+        Save = DropdownConfig.Save
+    }
 
-	local DropdownContainer = AddThemeObject(SetProps(SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), {
-		DropdownList
-	}), {
-		Parent = ItemParent,
-		Position = UDim2.new(0, 0, 0, 38),
-		Size = UDim2.new(1, 0, 1, -38),
-		ClipsDescendants = true
-	}), "Divider")
+    if #Dropdown.Options == 0 then
+        Dropdown.Value = {}
+    end
 
-	local Click = SetProps(MakeElement("Button"), {
-		Size = UDim2.new(1, 0, 1, 0)
-	})
+    local DropdownList = MakeElement("List")
 
-	local F = SetChildren(MakeElement("TFrame"), {
-    AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
-        Size = UDim2.new(1, -12, 1, 0),
-        Position = UDim2.new(0, 12, 0, 0),
-        Font = Enum.Font.GothamBold,
-        Name = "Content"
-    }), "Text"),
-    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
-        Size = UDim2.new(0, 20, 0, 20),
-        AnchorPoint = Vector2.new(0, 0.5),
-        Position = UDim2.new(1, -30, 0.5, 0),
-        ImageColor3 = Color3.fromRGB(240, 240, 240),
-        Name = "Ico"
-    }), "TextDark"),
-    AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
-        Size = UDim2.new(1, -40, 1, 0),
-        Font = Enum.Font.Gotham,
-        Name = "Selected",
-        TextXAlignment = Enum.TextXAlignment.Right
-    }), "TextDark"),
-    AddThemeObject(SetProps(MakeElement("Frame"), {
-        Size = UDim2.new(1, 0, 0, 1),
-        Position = UDim2.new(0, 0, 1, -1),
-        Name = "Line",
-        Visible = false
-    }), "Stroke"), 
-    Click
-})
-F.Name = "F"
+    local DropdownContainer = AddThemeObject(SetProps(SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), {
+        DropdownList
+    }), {
+        Position = UDim2.new(0, 0, 0, 38),
+        Size = UDim2.new(1, 0, 1, -38),
+        ClipsDescendants = true
+    }), "Divider")
 
-local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-    Size = UDim2.new(1, 0, 0, 38),
-    Parent = ItemParent,
-    ClipsDescendants = true
-}), {
-    DropdownContainer,
-    F,
-    AddThemeObject(MakeElement("Stroke"), "Stroke"),
-    MakeElement("Corner")
-}), "Second")
+    local Click = SetProps(MakeElement("Button"), {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1
+    })
 
-	AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
-		DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
-	end)
+    local F = SetChildren(MakeElement("TFrame"), {
+        AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
+            Size = UDim2.new(1, -12, 1, 0),
+            Position = UDim2.new(0, 12, 0, 0),
+            Font = Enum.Font.GothamBold,
+            Name = "Content"
+        }), "Text"),
+        AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
+            Size = UDim2.new(0, 20, 0, 20),
+            AnchorPoint = Vector2.new(0, 0.5),
+            Position = UDim2.new(1, -30, 0.5, 0),
+            ImageColor3 = Color3.fromRGB(240, 240, 240),
+            Name = "Ico"
+        }), "TextDark"),
+        AddThemeObject(SetProps(MakeElement("Label", "", 13), {
+            Size = UDim2.new(1, -40, 1, 0),
+            Font = Enum.Font.Gotham,
+            Name = "Selected",
+            TextXAlignment = Enum.TextXAlignment.Right,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+        }), "TextDark"),
+        AddThemeObject(SetProps(MakeElement("Frame"), {
+            Size = UDim2.new(1, 0, 0, 1),
+            Position = UDim2.new(0, 0, 1, -1),
+            Name = "Line",
+            Visible = false
+        }), "Stroke"),
+        Click
+    })
+    F.Name = "F"
 
-	local function ToggleOption(Value)
-		local index = table.find(Dropdown.Values, Value)
-		if index then
-			table.remove(Dropdown.Values, index)
-		else
-			table.insert(Dropdown.Values, Value)
-		end
-		UpdateSelectedText()
-		DropdownConfig.Callback(table.clone(Dropdown.Values))
+    local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
+        Size = UDim2.new(1, 0, 0, 38),
+        Parent = ItemParent,
+        ClipsDescendants = true
+    }), {
+        DropdownContainer,
+        F,
+        AddThemeObject(MakeElement("Stroke"), "Stroke"),
+        MakeElement("Corner")
+    }), "Second")
 
-		for option, btn in pairs(Dropdown.Buttons) do
-			local isSelected = table.find(Dropdown.Values, option) ~= nil
-			TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundTransparency = isSelected and 0 or 1}):Play()
-			TweenService:Create(btn.Title, TweenInfo.new(0.15), {TextTransparency = isSelected and 0 or 0.4}):Play()
-		end
-	end
+    AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+        DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
+    end)
 
-	local function AddOptions(Options)
-		for _, Option in pairs(Options) do
-			local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
-				MakeElement("Corner", 0, 6),
-				AddThemeObject(SetProps(MakeElement("Label", Option, 13, 0.4), {
-					Position = UDim2.new(0, 8, 0, 0),
-					Size = UDim2.new(1, -8, 1, 0),
-					Name = "Title"
-				}), "Text")
-			}), {
-				Parent = DropdownContainer,
-				Size = UDim2.new(1, 0, 0, 28),
-				BackgroundTransparency = 1,
-				ClipsDescendants = true
-			}), "Divider")
+    local function UpdateSelectedText()
+        local selectedList = {}
+        for option, selected in pairs(SelectedValues) do
+            if selected then
+                table.insert(selectedList, option)
+            end
+        end
+        local text = next(selectedList) and table.concat(selectedList, ", ") or "None"
+        F.Selected.Text = text
+    end
 
-			AddConnection(OptionBtn.MouseButton1Click, function()
-				ToggleOption(Option)
-				SaveCfg(game.GameId)
-			end)
+    local function AddOptions(Options)
+        for _, Option in pairs(Options) do
+            local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
+                MakeElement("Corner", 0, 6),
+                AddThemeObject(SetProps(MakeElement("Label", Option, 13, 0.4), {
+                    Position = UDim2.new(0, 8, 0, 0),
+                    Size = UDim2.new(1, -8, 1, 0),
+                    Name = "Title"
+                }), "Text")
+            }), {
+                Size = UDim2.new(1, 0, 0, 28),
+                BackgroundTransparency = 1,
+                ClipsDescendants = true
+            }), "Divider")
 
-			Dropdown.Buttons[Option] = OptionBtn
-		end
-	end
+            -- Set initial style for selected items
+            if SelectedValues[Option] then
+                TweenService:Create(OptionBtn, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0.3}):Play()
+                TweenService:Create(OptionBtn.Title, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+            else
+                TweenService:Create(OptionBtn, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(OptionBtn.Title, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0.4}):Play()
+            end
 
-	function Dropdown:Refresh(Options, Delete)
-		if Delete then
-			for _, v in pairs(Dropdown.Buttons) do
-				v:Destroy()
-			end
-			table.clear(Dropdown.Options)
-			table.clear(Dropdown.Buttons)
-			table.clear(Dropdown.Values)
-		end
-		Dropdown.Options = Options
-		AddOptions(Dropdown.Options)
-	end
+            AddConnection(OptionBtn.MouseButton1Click, function()
+                SelectedValues[Option] = not SelectedValues[Option]
 
-	AddConnection(Click.MouseButton1Click, function()
-		Dropdown.Toggled = not Dropdown.Toggled
-		DropdownFrame.F.Line.Visible = Dropdown.Toggled
-		TweenService:Create(DropdownFrame.F.Ico, TweenInfo.new(0.15), {Rotation = Dropdown.Toggled and 180 or 0}):Play()
-		if #Dropdown.Options > MaxElements then
-			TweenService:Create(DropdownFrame, TweenInfo.new(0.15), {
-				Size = Dropdown.Toggled and UDim2.new(1, 0, 0, 38 + (MaxElements * 28)) or UDim2.new(1, 0, 0, 38)
-			}):Play()
-		else
-			TweenService:Create(DropdownFrame, TweenInfo.new(0.15), {
-				Size = Dropdown.Toggled and UDim2.new(1, 0, 0, DropdownList.AbsoluteContentSize.Y + 38) or UDim2.new(1, 0, 0, 38)
-			}):Play()
-		end
-	end)
+                -- Animate toggle
+                if SelectedValues[Option] then
+                    TweenService:Create(OptionBtn, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0.3}):Play()
+                    TweenService:Create(OptionBtn.Title, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+                else
+                    TweenService:Create(OptionBtn, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+                    TweenService:Create(OptionBtn.Title, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0.4}):Play()
+                end
 
-	for _, val in pairs(DropdownConfig.Default) do
-		if table.find(Dropdown.Options, val) then
-			table.insert(Dropdown.Values, val)
-		end
-	end
-	UpdateSelectedText()
+                UpdateSelectedText()
+                DropdownConfig.Callback(getSelected())
+            end)
 
-	Dropdown:Refresh(Dropdown.Options, false)
+            Dropdown.Buttons[Option] = OptionBtn
+        end
+    end
 
-	if DropdownConfig.Flag then
-		LunoxLib.Flags[DropdownConfig.Flag] = Dropdown
-	end
+    function Dropdown:Refresh(Options, Delete)
+        if Delete then
+            for _, v in pairs(Dropdown.Buttons) do
+                v:Destroy()
+            end
+            table.clear(Dropdown.Options)
+            table.clear(Dropdown.Buttons)
+        end
+        Dropdown.Options = Options
+        AddOptions(Dropdown.Options)
+    end
 
-	return Dropdown
+    function getSelected()
+        local list = {}
+        for option, selected in pairs(SelectedValues) do
+            if selected then
+                table.insert(list, option)
+            end
+        end
+        return list
+    end
+
+    AddConnection(Click.MouseButton1Click, function()
+        Dropdown.Toggled = not Dropdown.Toggled
+        DropdownFrame.F.Line.Visible = Dropdown.Toggled
+        TweenService:Create(DropdownFrame.F.Ico, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Rotation = Dropdown.Toggled and 180 or 0
+        }):Play()
+        if #Dropdown.Options > MaxElements then
+            TweenService:Create(DropdownFrame, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = Dropdown.Toggled and UDim2.new(1, 0, 0, 38 + (MaxElements * 28)) or UDim2.new(1, 0, 0, 38)
+            }):Play()
+        else
+            TweenService:Create(DropdownFrame, TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = Dropdown.Toggled and UDim2.new(1, 0, 0, DropdownList.AbsoluteContentSize.Y + 38) or UDim2.new(1, 0, 0, 38)
+            }):Play()
+        end
+    end)
+
+    Dropdown:Refresh(Dropdown.Options, false)
+    UpdateSelectedText()
+    if DropdownConfig.Flag then
+        LunoxLib.Flags[DropdownConfig.Flag] = Dropdown
+    end
+    return Dropdown
 end
 			function ElementFunction:AddBind(BindConfig)
 				BindConfig.Name = BindConfig.Name or "Bind"
