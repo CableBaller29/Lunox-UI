@@ -1131,47 +1131,46 @@ function LunoxLib:MakeWindow(WindowConfig)
 		Size = UDim2.new(1, 0, 1, 0)
 	})
 
-	local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
-		Size = UDim2.new(1, 0, 0, 38),
-		Parent = ItemParent,
-		ClipsDescendants = true
-	}), {
-		DropdownContainer,
-		SetProps(SetChildren(MakeElement("TFrame"), {
-			AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
-				Size = UDim2.new(1, -12, 1, 0),
-				Position = UDim2.new(0, 12, 0, 0),
-				Font = Enum.Font.GothamBold,
-				Name = "Content"
-			}), "Text"),
-			AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
-				Size = UDim2.new(0, 20, 0, 20),
-				AnchorPoint = Vector2.new(0, 0.5),
-				Position = UDim2.new(1, -30, 0.5, 0),
-				ImageColor3 = Color3.fromRGB(240, 240, 240),
-				Name = "Ico"
-			}), "TextDark"),
-			AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
-				Size = UDim2.new(1, -40, 1, 0),
-				Font = Enum.Font.Gotham,
-				Name = "Selected",
-				TextXAlignment = Enum.TextXAlignment.Right
-			}), "TextDark"),
-			AddThemeObject(SetProps(MakeElement("Frame"), {
-				Size = UDim2.new(1, 0, 0, 1),
-				Position = UDim2.new(0, 0, 1, -1),
-				Name = "Line",
-				Visible = false
-			}), "Stroke"),
-			Click
-		}), {
-			Size = UDim2.new(1, 0, 0, 38),
-			ClipsDescendants = true,
-			Name = "F"
-		}),
-		AddThemeObject(MakeElement("Stroke"), "Stroke"),
-		MakeElement("Corner")
-	}), "Second")
+	local F = SetChildren(MakeElement("TFrame"), {
+    AddThemeObject(SetProps(MakeElement("Label", DropdownConfig.Name, 15), {
+        Size = UDim2.new(1, -12, 1, 0),
+        Position = UDim2.new(0, 12, 0, 0),
+        Font = Enum.Font.GothamBold,
+        Name = "Content"
+    }), "Text"),
+    AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
+        Size = UDim2.new(0, 20, 0, 20),
+        AnchorPoint = Vector2.new(0, 0.5),
+        Position = UDim2.new(1, -30, 0.5, 0),
+        ImageColor3 = Color3.fromRGB(240, 240, 240),
+        Name = "Ico"
+    }), "TextDark"),
+    AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
+        Size = UDim2.new(1, -40, 1, 0),
+        Font = Enum.Font.Gotham,
+        Name = "Selected",
+        TextXAlignment = Enum.TextXAlignment.Right
+    }), "TextDark"),
+    AddThemeObject(SetProps(MakeElement("Frame"), {
+        Size = UDim2.new(1, 0, 0, 1),
+        Position = UDim2.new(0, 0, 1, -1),
+        Name = "Line",
+        Visible = false
+    }), "Stroke"), 
+    Click
+})
+F.Name = "F"
+
+local DropdownFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
+    Size = UDim2.new(1, 0, 0, 38),
+    Parent = ItemParent,
+    ClipsDescendants = true
+}), {
+    DropdownContainer,
+    F,
+    AddThemeObject(MakeElement("Stroke"), "Stroke"),
+    MakeElement("Corner")
+}), "Second")
 
 	AddConnection(DropdownList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
 		DropdownContainer.CanvasSize = UDim2.new(0, 0, 0, DropdownList.AbsoluteContentSize.Y)
